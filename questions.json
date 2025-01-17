@@ -1,0 +1,81 @@
+[
+    {
+        "question": "What is your primary concern or desired result?",
+        "options": [
+            "Clear Complexion",
+            "Even Skin Tone",
+            "Youthful Radiance and Anti-Aging",
+            "Eye Rejuvenation",
+            "Body Contouring",
+            "Hair Solutions"
+        ]
+    },
+    {
+        "question": "How much are you willing to pay for one treatment session?",
+        "options": [
+            "SGD 20 - 99",
+            "SGD 100 - 199",
+            "SGD 200 - 299",
+            "SGD 300 - 399",
+            "SGD 400 - 499",
+            "SGD 500 - 699",
+            "SGD 700 - 999",
+            "SGD 1000 - 1499",
+            "SGD 1500 - 3000",
+            "Above SGD 3000"
+        ]
+    },
+    {
+        "question": "How long would you like the results to last?",
+        "options": [
+            "12 months or more",
+            "6 months"
+        ]
+    },
+    {
+        "question": "How many sessions are you willing to undergo to see results?",
+        "options": [
+            "1 session",
+            "2 sessions",
+            "4 sessions",
+            "6 sessions"
+        ]
+    },
+    {
+        "question": "What level of discomfort are you willing to tolerate during the treatment?",
+        "options": [
+            "Low - Comparable to a light pinch or the sensation of an ant bite.",
+            "Low-moderate - Similar to the feeling of a rubber band snap against the skin.",
+            "Moderate - Feels like a mild sunburn or the sensation experienced during laser hair removal.",
+            "Moderate-high - Comparable to the discomfort of a deeper injection or microneedling.",
+            "High - Similar to the sensation experienced during more intense laser treatments or deep chemical peels."
+        ]
+    },
+    {
+        "question": "How much pain from an injection can you tolerate?",
+        "options": [
+            "Non-injectable",
+            "Injectable or higher"
+        ]
+    },    
+    {
+        "question": "How much downtime are you willing to accommodate post-treatment?",
+        "options": [
+            "None",
+            "1 day",
+            "3 days",
+            "7 days"
+        ]
+    },
+    {
+        "question": "How long do you prefer the interval between sessions to be?",
+        "options": [
+            "1 day",
+            "1 week",
+            "2 weeks",
+            "1 month",
+            "3 months",
+            "6 - 12 months"
+        ]
+    }
+]

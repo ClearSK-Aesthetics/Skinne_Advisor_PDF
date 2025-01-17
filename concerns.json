@@ -1,0 +1,25 @@
+{
+    "Clear Complexion": [
+        "SK2 - Acne, Pores & Oily Skin",
+        "SK3 - Acne Scarring, Marks & Uneven Skin Texture"
+    ],
+    "Even Skin Tone": [
+        "SK4 - Pigmentation, Uneven Skin Tone"
+    ],
+    "Youthful Radiance and Anti-Aging": [
+        "SK1 - Dull or Dry Skin",
+        "SK5 - Sagging, Wrinkles, Lines, Aging Signs",
+        "FC1 - V Face Shape/Lift, Matrix & Collagen Lift, Anti-Aging",
+        "FC2 - Face Slimming, Underchin Fats Reduction"
+    ],
+    "Eye Rejuvenation": [
+        "SK6 - Eye Bag/Dark Circles, Droopy Eyelids"
+    ],
+    "Body Contouring": [
+        "BS1 - Body Slimming & Fats Reduction"
+    ],
+    "Hair Solutions": [
+        "HR1 - Hair Removal: Face, Body & Limbs",
+        "HG1 - Hair Growth & Scalp"
+    ]
+}
