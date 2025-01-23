@@ -328,13 +328,21 @@ def main():
         display_p_score()
 
     if "final_table" in st.session_state and st.session_state["final_table"] is not None:
+        # Generate PDF from the dataframe
         pdf_buffer = generate_pdf_from_dataframe(st.session_state["final_table"])
-        st.download_button(
-            label="Download Table as PDF",
-            data=pdf_buffer,
-            file_name="ClearSK_Top_5_Treatments.pdf",
-            mime="application/pdf",
-        )
+        
+        # Create two columns
+        col1, col2 = st.columns([1, 3])  # Adjust column proportions if needed
+        
+        with col1:
+            st.write("**Please download this table after you finish.**")
+            # Add the download button in the first column
+            st.download_button(
+                label="Download Table as PDF",
+                data=pdf_buffer,
+                file_name="ClearSK_Top_5_Treatments.pdf",
+                mime="application/pdf",
+            )
 
 # Entry point for the application
 if __name__ == "__main__":
