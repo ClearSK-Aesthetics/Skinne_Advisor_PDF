@@ -335,7 +335,7 @@ def main():
         col1, col2 = st.columns([1, 3])  # Adjust column proportions if needed
         
         with col1:
-            st.write("**Please download this table after you finish.**")
+            st.write("**Please download the pdf and this will be your exclusive coupon!**")
             # Add the download button in the first column
             st.download_button(
                 label="Download Table as PDF",
