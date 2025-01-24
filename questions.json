@@ -52,10 +52,10 @@
         ]
     },
     {
-        "question": "How much pain from an injection can you tolerate?",
+        "question": "Do you prefer treatments without injections, or are you open to options involving injections?",
         "options": [
-            "Non-injectable",
-            "Injectable or higher"
+            "Non-Injectable Treatments Only",
+            "Open to All Treatments (Including Injectables)"
         ]
     },    
     {
