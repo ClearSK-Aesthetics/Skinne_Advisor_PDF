@@ -30,10 +30,16 @@ def load_concerns():
         return json.load(file)
 
 @st.cache_data
-def load_data():
-    """Load treatment attribute data from an Excel file."""
+@st.cache_data
+def load_data(sheet_name):
+    """Load treatment attribute data from a specified Excel sheet."""
     filepath = "Treatment Attribute Master (Skinne Advisor & Trainer).xlsx"
-    return pd.read_excel(filepath, sheet_name="TAM 250117")
+    try:
+        return pd.read_excel(filepath, sheet_name=sheet_name)
+    except Exception as e:
+        st.error(f"Error loading data from sheet '{sheet_name}': {e}")
+        return pd.DataFrame()
+
 
 questions = load_questions()
 concerns = load_concerns()
@@ -75,12 +81,17 @@ def render_survey(questions):
             responses["Specific Interest"] = numbered_specific_options[int(specific_choice.split(")")[0]) - 1]
 
     # Render general survey questions
-    for question in questions[1:]:
+    for i, question in enumerate(questions[1:], start=1):
         response = render_question(question)
         if response:
             responses[question["question"]] = response
 
+        # Handle injectable preference for Question 6
+        if i + 1 == 6:  # Adjust index for Question 6
+            responses["Delivery Mode"] = response
+
     return responses
+
 
 def extract_concern_code(specific_interest):
     """Extract concern code from the specific interest string."""
@@ -115,6 +126,8 @@ def display_p_score():
     # Validate scores length
     if len(scores) != len(questions):
         st.error("Incomplete data. Please answer all the questions before submitting.")
+        print(len(scores))
+        print(len(questions))
         return
 
     # Call the treatment recommendation function
@@ -211,14 +224,30 @@ def calculate_d_score(p_score, t_score):
     return sum(abs(p - safe_int_conversion(t)) for p, t in zip(p_score[1:], t_score[1:]))
 
 def recommend_treatments(p_score):
-    """Generate treatment recommendations."""
-    data = load_data()
-    concern_code = p_score[0]
+    """Generate treatment recommendations based on injectable preference."""
+    # Retrieve the injectable preference from responses
+    responses = st.session_state.get("responses", {})
+    injectable_preference = responses.get("Delivery Mode")
+    if injectable_preference == 1:
+        sheet_name = "Non-injectable"  # Open to all treatments
+    elif injectable_preference == 2:
+        sheet_name = "All treatments"  # Non-injectable treatments only
+    else:
+        st.error("Invalid selection for injectable preference.")
+        return
 
+    # Load data from the appropriate sheet
+    data = load_data(sheet_name)
+    if data.empty:
+        st.error(f"Unable to load data from the '{sheet_name}' sheet.")
+        return
+
+    concern_code = p_score[0]
     if not concern_code:
         st.error("Invalid concern code extracted. Please check your responses.")
         return
 
+    # Continue with filtering, scoring, and displaying recommendations
     data["T-Score"] = data["T-Score"].apply(convert_t_score)
     data["D-Score"] = data.apply(lambda row: calculate_d_score(p_score, row["T-Score"]), axis=1)
 
@@ -239,7 +268,7 @@ def recommend_treatments(p_score):
         'Level of Discomfort:\n\n1: Low\n2: Low-moderate\n3: Moderate\n4: Moderate-high\n5: High': 'Discomfort Level',
         'Amount of Downtime:\n\n1: None\n2: 1 day\n3: 3 days\n4: 7 days ': 'Downtime',
         'Prescribed Intervals between Sessions:\n\n1: 1 day\n2: 1 week\n3: 2 weeks\n4: 1 month\n5: 3 months\n6: 6 months': 'Interval Between Sessions',
-        'Delivery Mode': 'Delivery Mode'    
+        'Delivery Mode': 'Delivery Mode'
     })
 
     top_recommendations.index = range(1, len(top_recommendations) + 1)
@@ -257,13 +286,13 @@ def recommend_treatments(p_score):
     # Save final_table to session_state
     st.session_state["final_table"] = final_table
 
-
     # Display the recommendations or show an error if empty
     if not final_table.empty:
         st.write("### Top 5 Recommended Treatments")
         st.table(final_table)
     else:
         st.error("No matching treatments found after filtering and scoring.")
+
 
 
 from reportlab.lib.pagesizes import landscape
