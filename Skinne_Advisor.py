@@ -332,7 +332,7 @@ def main():
         pdf_buffer = generate_pdf_from_dataframe(st.session_state["final_table"])
         
         # Create two columns
-        col1, col2 = st.columns([1, 3])  # Adjust column proportions if needed
+        col1, col2 = st.columns([1, 2])  # Adjust column proportions if needed
         
         with col1:
             st.write("**Please download the pdf and this will be your exclusive coupon!**")
