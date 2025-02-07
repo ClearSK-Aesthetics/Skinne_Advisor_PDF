@@ -44,11 +44,11 @@
     {
         "question": "What level of discomfort are you willing to tolerate during the treatment?",
         "options": [
-            "Low - Comparable to a light pinch or the sensation of an ant bite.",
-            "Low-moderate - Similar to the feeling of a rubber band snap against the skin.",
-            "Moderate - Feels like a mild sunburn or the sensation experienced during laser hair removal.",
-            "Moderate-high - Comparable to the discomfort of a deeper injection or microneedling.",
-            "High - Similar to the sensation experienced during more intense laser treatments or deep chemical peels."
+            "RF gentle heat and similar", 
+            "Laser mild pricking sensation and the like or mild HIFU pulses",
+            "Micro needles or shallow prick of injectable needles or sharper HIFU pulses", 
+            "Skin booster injection on skin surface", 
+            "Deeper injection like fillers and Botox for face shaping"
         ]
     },
     {
