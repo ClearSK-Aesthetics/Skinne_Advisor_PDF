@@ -12,7 +12,6 @@ def generate_voucher_code():
     """Generate a unique voucher code."""
     return str(uuid.uuid4())[:8]  # Use the first 8 characters of a UUID
 
-
 # --- PAGE CONFIGURATION ---
 st.set_page_config(page_title="Skinne Advisor", layout="wide", initial_sidebar_state="collapsed")
 
@@ -30,16 +29,30 @@ def load_concerns():
         return json.load(file)
 
 @st.cache_data
-@st.cache_data
-def load_data(sheet_name):
+def load_data(sheet_name, filter_injectable=False):
     """Load treatment attribute data from a specified Excel sheet."""
     filepath = "Treatment Attribute Master (Skinne Advisor & Trainer).xlsx"
+
     try:
-        return pd.read_excel(filepath, sheet_name=sheet_name)
+        df = pd.read_excel(filepath, sheet_name=sheet_name)
+
+        if df.shape[1] == 0:
+            st.error("Error: The dataset has no columns.")
+            return pd.DataFrame()
+
+        # filter data(status=A)
+        df = df[df.iloc[:, 0] == "A"].reset_index(drop=True)
+
+        # filter data with prefix= "injectable" 
+        if filter_injectable and "Sub-segment" in df.columns:
+            df["Sub-segment"] = df["Sub-segment"].astype(str).fillna("")  # ensure str format
+            df = df[~df["Sub-segment"].str.startswith("injectable")]
+
+        return df
+
     except Exception as e:
         st.error(f"Error loading data from sheet '{sheet_name}': {e}")
         return pd.DataFrame()
-
 
 questions = load_questions()
 concerns = load_concerns()
@@ -228,16 +241,18 @@ def recommend_treatments(p_score):
     # Retrieve the injectable preference from responses
     responses = st.session_state.get("responses", {})
     injectable_preference = responses.get("Delivery Mode")
-    if injectable_preference == 1:
-        sheet_name = "Non-injectable"  # Open to all treatments
-    elif injectable_preference == 2:
-        sheet_name = "All treatments"  # Non-injectable treatments only
+    if injectable_preference == 2:
+        sheet_name = "All treatments"  # Load all treatments
+        filter_injectable = False
+    elif injectable_preference == 1:
+        sheet_name = "All treatments"  # Load all treatments but filter out injectable
+        filter_injectable = True
     else:
         st.error("Invalid selection for injectable preference.")
         return
 
     # Load data from the appropriate sheet
-    data = load_data(sheet_name)
+    data = load_data(sheet_name, filter_injectable)
     if data.empty:
         st.error(f"Unable to load data from the '{sheet_name}' sheet.")
         return
@@ -246,7 +261,7 @@ def recommend_treatments(p_score):
     if not concern_code:
         st.error("Invalid concern code extracted. Please check your responses.")
         return
-
+    
     # Continue with filtering, scoring, and displaying recommendations
     data["T-Score"] = data["T-Score"].apply(convert_t_score)
     data["D-Score"] = data.apply(lambda row: calculate_d_score(p_score, row["T-Score"]), axis=1)
@@ -377,4 +392,4 @@ def main():
 if __name__ == "__main__":
     main()
 
- 
+
