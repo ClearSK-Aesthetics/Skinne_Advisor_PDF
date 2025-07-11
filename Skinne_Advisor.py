@@ -253,7 +253,7 @@ def recommend_treatments(p_score):
 
     # Load data from the appropriate sheet
     data = load_data(sheet_name, filter_injectable)
-    st.write("Actual column names from file:", data.columns.tolist())
+    
     if data.empty:
         st.error(f"Unable to load data from the '{sheet_name}' sheet.")
         return
@@ -276,16 +276,15 @@ def recommend_treatments(p_score):
     top_recommendations = filtered_data.nsmallest(5, "D-Score")
 
     # Rename columns for better readability
-    top_recommendations = top_recommendations.rename(columns={
-        'Treatment Brand/Name': 'Treatment Name',
-        'Budget Level:\n(Price Per Session)\n\n1: SGD 20 - 99\n2: SGD 100 - 199\n3: SGD 200 - 299\n4: SGD 300 - 399\n5: SGD 400 - 499\n6: SGD 500 - 699\n7: SGD 700 - 999\n8: SGD 1000 - 1499\n9: SGD 1500 - 3000\n10: Above SGD 3000': 'Budget Level (SGD)',
-        'Duration of Results:\n\n1: 12 months\n2: 6 months\n': 'Duration of Results (months)',
-        'Number of Sessions Required:\n\n1: 1 session\n2: 2 sessions\n3: 4 sessions\n4: 6 sessions': 'Sessions Required',
-        'Discomfort Level':'Discomfort Level',
-        'Amount of Downtime:\n\n1: None\n2: 1 day\n3: 3 days\n4: 7 days ': 'Downtime',
-        'Prescribed Intervals between Sessions:\n\n1: 1 day\n2: 1 week\n3: 2 weeks\n4: 1 month\n5: 3 months\n6: 6 months': 'Interval Between Sessions',
-        'Delivery Mode': 'Delivery Mode'
-    })
+    top_recommendations = top_recommendations.rename(columns = {
+    'Treatment Brand/Name': 'Treatment Name',
+    'Budget Level\n(Price Per Session)\n\n1: SGD 20 - 99\n2: SGD 100 - 199\n3: SGD 200 - 299\n4: SGD 300 - 399\n5: SGD 400 - 499\n6: SGD 500 - 699\n7: SGD 700 - 999\n8: SGD 1000 - 1499\n9: SGD 1500 - 3000\n10: Above SGD 3000': 'Budget Level (SGD)',
+    'Duration of Results\n\n1: 12 months\n2: 6 months': 'Duration of Results (months)',
+    'Number of Sessions Required\n\n1: 1 session\n2: 2 sessions\n3: 4 sessions\n4: 6 sessions': 'Sessions Required',
+    'Level of Discomfort\n\n1: Low\n2: Low-moderate\n3: Moderate\n4: Moderate-high\n5: High': 'Discomfort Level',
+    'Amount of Downtime\n\n1: None\n2: 1 day\n3: 3 days\n4: 7 days': 'Downtime',
+    'Prescribed Intervals between Sessions\n\n1: 1 day\n2: 1 week\n3: 2 weeks\n4: 1 month\n5: 3 months\n6: 6 months': 'Interval Between Sessions'
+})
 
     top_recommendations.index = range(1, len(top_recommendations) + 1)
 
