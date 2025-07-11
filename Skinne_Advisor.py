@@ -253,6 +253,7 @@ def recommend_treatments(p_score):
 
     # Load data from the appropriate sheet
     data = load_data(sheet_name, filter_injectable)
+    st.write("Actual column names from file:", data.columns.tolist())
     if data.empty:
         st.error(f"Unable to load data from the '{sheet_name}' sheet.")
         return
