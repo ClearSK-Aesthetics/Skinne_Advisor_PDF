@@ -12,6 +12,7 @@ def generate_voucher_code():
     """Generate a unique voucher code."""
     return str(uuid.uuid4())[:8]  # Use the first 8 characters of a UUID
 
+
 # --- PAGE CONFIGURATION ---
 st.set_page_config(page_title="Skinne Advisor", layout="wide", initial_sidebar_state="collapsed")
 
@@ -29,30 +30,16 @@ def load_concerns():
         return json.load(file)
 
 @st.cache_data
-def load_data(sheet_name, filter_injectable=False):
+@st.cache_data
+def load_data(sheet_name):
     """Load treatment attribute data from a specified Excel sheet."""
-    filepath = "250711_Treatment Attribute Master (Skinne Advisor & Trainer).xlsx"
-
+    filepath = "Treatment Attribute Master (Skinne Advisor & Trainer).xlsx"
     try:
-        df = pd.read_excel(filepath, sheet_name=sheet_name)
-
-        if df.shape[1] == 0:
-            st.error("Error: The dataset has no columns.")
-            return pd.DataFrame()
-
-        # filter data(status=A)
-        df = df[df.iloc[:, 0] == "A"].reset_index(drop=True)
-
-        # filter data with prefix= "injectable" 
-        if filter_injectable and "Sub-segment" in df.columns:
-            df["Sub-segment"] = df["Sub-segment"].astype(str).fillna("")  # ensure str format
-            df = df[~df["Sub-segment"].str.startswith("injectable")]
-
-        return df
-
+        return pd.read_excel(filepath, sheet_name=sheet_name)
     except Exception as e:
         st.error(f"Error loading data from sheet '{sheet_name}': {e}")
         return pd.DataFrame()
+
 
 questions = load_questions()
 concerns = load_concerns()
@@ -241,19 +228,16 @@ def recommend_treatments(p_score):
     # Retrieve the injectable preference from responses
     responses = st.session_state.get("responses", {})
     injectable_preference = responses.get("Delivery Mode")
-    if injectable_preference == 2:
-        sheet_name = "All treatments"  # Load all treatments
-        filter_injectable = False
-    elif injectable_preference == 1:
-        sheet_name = "All treatments"  # Load all treatments but filter out injectable
-        filter_injectable = True
+    if injectable_preference == 1:
+        sheet_name = "Non-injectable"  # Open to all treatments
+    elif injectable_preference == 2:
+        sheet_name = "All treatments"  # Non-injectable treatments only
     else:
         st.error("Invalid selection for injectable preference.")
         return
 
     # Load data from the appropriate sheet
-    data = load_data(sheet_name, filter_injectable)
-    
+    data = load_data(sheet_name)
     if data.empty:
         st.error(f"Unable to load data from the '{sheet_name}' sheet.")
         return
@@ -262,7 +246,7 @@ def recommend_treatments(p_score):
     if not concern_code:
         st.error("Invalid concern code extracted. Please check your responses.")
         return
-    
+
     # Continue with filtering, scoring, and displaying recommendations
     data["T-Score"] = data["T-Score"].apply(convert_t_score)
     data["D-Score"] = data.apply(lambda row: calculate_d_score(p_score, row["T-Score"]), axis=1)
@@ -276,15 +260,17 @@ def recommend_treatments(p_score):
     top_recommendations = filtered_data.nsmallest(5, "D-Score")
 
     # Rename columns for better readability
-    top_recommendations = top_recommendations.rename(columns = {
-    'Treatment Brand/Name': 'Treatment Name',
-    'Budget Level\n(Price Per Session)\n\n1: SGD 20 - 99\n2: SGD 100 - 199\n3: SGD 200 - 299\n4: SGD 300 - 399\n5: SGD 400 - 499\n6: SGD 500 - 699\n7: SGD 700 - 999\n8: SGD 1000 - 1499\n9: SGD 1500 - 3000\n10: Above SGD 3000': 'Budget Level (SGD)',
-    'Duration of Results\n\n1: 12 months\n2: 6 months': 'Duration of Results (months)',
-    'Number of Sessions Required\n\n1: 1 session\n2: 2 sessions\n3: 4 sessions\n4: 6 sessions': 'Sessions Required',
-    'Level of Discomfort\n\n1: Low\n2: Low-moderate\n3: Moderate\n4: Moderate-high\n5: High': 'Discomfort Level',
-    'Amount of Downtime\n\n1: None\n2: 1 day\n3: 3 days\n4: 7 days': 'Downtime',
-    'Prescribed Intervals between Sessions\n\n1: 1 day\n2: 1 week\n3: 2 weeks\n4: 1 month\n5: 3 months\n6: 6 months': 'Interval Between Sessions'
-})
+    top_recommendations = top_recommendations.rename(columns={
+        'Treatment Brand/Name': 'Treatment Name',
+        'Budget Level:\n(Price Per Session)\n\n1: SGD 20 - 99\n2: SGD 100 - 199\n3: SGD 200 - 299\n4: SGD 300 - 399\n5: SGD 400 - 499\n6: SGD 500 - 699\n7: SGD 700 - 999\n8: SGD 1000 - 1499\n9: SGD 1500 - 3000\n10: Above SGD 3000': 'Budget Level (SGD)',
+        'Duration of Results:\n\n1: 12 months\n2: 6 months\n': 'Duration of Results (months)',
+        'Number of Sessions Required:\n\n1: 1 session\n2: 2 sessions\n3: 4 sessions\n4: 6 sessions': 'Sessions Required',
+        'Level of Discomfort:\n\n1: Low\n2: Low-moderate\n3: Moderate\n4: Moderate-high\n5: High': 'Discomfort Level',
+        'Discomfort Level':'Discomfort Level',
+        'Amount of Downtime:\n\n1: None\n2: 1 day\n3: 3 days\n4: 7 days ': 'Downtime',
+        'Prescribed Intervals between Sessions:\n\n1: 1 day\n2: 1 week\n3: 2 weeks\n4: 1 month\n5: 3 months\n6: 6 months': 'Interval Between Sessions',
+        'Delivery Mode': 'Delivery Mode'
+    })
 
     top_recommendations.index = range(1, len(top_recommendations) + 1)
 
@@ -317,17 +303,17 @@ CUSTOM_LONG_PAGE = (1200, 600)  # Width x Height in points
 
 def generate_pdf_from_dataframe(df):
     buffer = BytesIO()
-    
+
     # Use the custom page size
     pdf = SimpleDocTemplate(buffer, pagesize=landscape(CUSTOM_LONG_PAGE))
-    
+
     # Add voucher code to the data
     voucher_code = st.session_state.get("voucher_code", "N/A")
     voucher_row = ["VOUCHER CODE", voucher_code] + [""] * (len(df.columns) - 2)
-    
+
     data = [df.columns.tolist()] + df.values.tolist() + [voucher_row]
     table = Table(data)
-    
+
     # Set table styles
     table.setStyle(TableStyle([
         ('BACKGROUND', (0, 0), (-1, 0), colors.grey),  # Header background color
@@ -336,7 +322,7 @@ def generate_pdf_from_dataframe(df):
         ('GRID', (0, 0), (-1, -1), 1, colors.black),  # Add grid lines
         ('TEXTCOLOR', (0, len(data)-1), (1, len(data)-1), colors.green),  # Voucher code row text color
     ]))
-    
+
     pdf.build([table])
     buffer.seek(0)
     return buffer
@@ -374,10 +360,10 @@ def main():
     if "final_table" in st.session_state and st.session_state["final_table"] is not None:
         # Generate PDF from the dataframe
         pdf_buffer = generate_pdf_from_dataframe(st.session_state["final_table"])
-        
+
         # Create two columns
         col1, col2 = st.columns([1, 2])  # Adjust column proportions if needed
-        
+
         with col1:
             st.write("**Please download the pdf and this will be your exclusive coupon!**")
             # Add the download button in the first column
@@ -391,5 +377,3 @@ def main():
 # Entry point for the application
 if __name__ == "__main__":
     main()
-
-
